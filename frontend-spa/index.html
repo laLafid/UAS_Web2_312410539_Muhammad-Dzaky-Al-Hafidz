@@ -1,0 +1,59 @@
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLapor</title>
+    <link rel="icon" type="image/png" href="/gambar/icon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/gambar/icon/favicon.svg" />
+    <link rel="shortcut icon" href="/gambar/icon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/gambar/icon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="CLapor" />
+    <link rel="manifest" href="/gambar/icon/site.webmanifest" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue-router@4"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body class="font-md">
+    <div id="app">
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
+            <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+                <router-link to="/" class="flex items-center gap-2">
+                    <img src="gambar/favicon.ico" alt="CLapor" class="w-8 h-8 rounded-lg object-cover" />
+                    <span class="font-bold text-gray-800 text-base">CLapor</span>
+                </router-link>
+                <div class="flex items-center gap-5 text-sm">
+                    <router-link to="/" class="nav-link text-gray-600 hover:text-gray-900 transition">Beranda</router-link>
+                    <router-link to="/laporan" class="nav-link text-gray-600 hover:text-gray-900 transition">Laporan</router-link>
+                    <router-link v-if="isLoggedIn" to="/artikel" class="nav-link text-gray-600 hover:text-gray-900 transition">Dashboard</router-link>
+                    <router-link to="/about" class="nav-link text-gray-600 hover:text-gray-900 transition">Tentang</router-link>
+                    <router-link v-if="!isLoggedIn" to="/login" class="btn-primary px-4 py-1.5 rounded-lg text-sm font-medium">Login Admin</router-link>
+                    <button v-else @click.prevent="logout" class="border border-red-300 hover:bg-red-50 text-red-600 px-4 py-1.5 rounded-lg transition text-sm">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <router-view></router-view>
+
+        <footer class="bg-gray-800 text-gray-400 text-xs text-center py-4 mt-12">
+            Lapor &copy; 2026 &mdash; Sistem Pelaporan Pengaduan Masyarakat
+        </footer>
+    </div>
+
+    <script src="assets/js/component/home.js"></script>
+    <script src="assets/js/component/artikel.js"></script>
+    <script src="assets/js/component/about.js"></script>
+    <script src="assets/js/component/login.js"></script>
+    <script src="assets/js/component/laporan.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

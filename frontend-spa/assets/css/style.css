@@ -1,0 +1,121 @@
+/* =============================================
+   SiLapor - Main Stylesheet
+   ============================================= */
+
+/* --- CSS Variables --- */
+:root {
+    --color-primary: #1e40af;
+    --color-primary-dark: #1e3a8a;
+
+    --bg: #f9fafb;
+    --bg-card: #ffffff;
+    --bg-subtle: #f3f4f6;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --text-faint: #9ca3af;
+    --border: #e5e7eb;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --font-size: 14px;
+
+}
+
+
+/* --- Dark Mode --- */
+body.dark {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-subtle: #273548;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-faint: #64748b;
+    --border: #334155;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* --- Font Sizes --- */
+body.font-sm { --font-size: 12px; }
+body.font-md { --font-size: 14px; }
+body.font-lg { --font-size: 16px; }
+
+/* --- Font Families --- */
+body {
+    --font-family: 'Inter', system-ui, sans-serif;
+}
+body.font-inter   { --font-family: 'Inter', system-ui, sans-serif; }
+body.font-poppins { --font-family: 'Poppins', system-ui, sans-serif; }
+body.font-nunito  { --font-family: 'Nunito', system-ui, sans-serif; }
+body.font-lato    { --font-family: 'Lato', system-ui, sans-serif; }
+body.font-serif   { --font-family: 'Georgia', 'Times New Roman', serif; }
+body.font-mono    { --font-family: 'Fira Code', 'Courier New', monospace; }
+
+/* --- Base --- */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    transition: background-color 0.2s, color 0.2s, font-size 0.1s, font-family 0.1s;
+}
+
+/* --- Primary Color Utilities --- */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+    transition: background-color 0.15s;
+}
+.btn-primary:hover { background-color: var(--color-primary-dark); }
+
+.text-primary  { color: var(--color-primary); }
+.bg-primary    { background-color: var(--color-primary); }
+.border-primary { border-color: var(--color-primary); }
+
+/* --- Dark Mode Card Overrides --- */
+body.dark .bg-white         { background-color: var(--bg-card) !important; }
+body.dark .bg-gray-50       { background-color: var(--bg) !important; }
+body.dark .bg-gray-100      { background-color: var(--bg-subtle) !important; }
+body.dark .text-gray-800    { color: var(--text) !important; }
+body.dark .text-gray-700    { color: var(--text) !important; }
+body.dark .text-gray-600    { color: var(--text-muted) !important; }
+body.dark .text-gray-500    { color: var(--text-muted) !important; }
+body.dark .text-gray-400    { color: var(--text-faint) !important; }
+body.dark .border-gray-100  { border-color: var(--border) !important; }
+body.dark .border-gray-200  { border-color: var(--border) !important; }
+body.dark .border-gray-300  { border-color: var(--border) !important; }
+body.dark .divide-gray-100 > * + * { border-color: var(--border) !important; }
+
+/* Dark — Navbar */
+body.dark nav.bg-white {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border) !important;
+}
+
+/* Dark — Footer */
+body.dark footer { background-color: #020617 !important; }
+
+/* Dark — Input & Select */
+body.dark input,
+body.dark select,
+body.dark textarea {
+    background-color: var(--bg-subtle) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+body.dark input::placeholder,
+body.dark textarea::placeholder { color: var(--text-faint); }
+
+/* Dark — Modal */
+body.dark .bg-blue-50  { background-color: #1e3a5f !important; }
+body.dark .border-blue-100 { border-color: #2d5a9e !important; }
+
+/* --- Nav Active Link --- */
+.router-link-active.nav-link {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* --- Smooth transitions --- */
+nav, footer, .bg-white, input, select, textarea {
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+/* --- Dark Mode Table Row Hover --- */
+body.dark .dark-hover:hover { background-color: var(--bg-subtle) !important; }
