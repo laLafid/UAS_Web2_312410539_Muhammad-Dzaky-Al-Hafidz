@@ -57,9 +57,9 @@ Form Edit![alt text](assets/gambar/formedit.png)
 
 ## External link
 
-1. Demo Aplikasi [CLapor](http://localhost/UAS/frontend-spa/#/)
+1. Demo Aplikasi [CLapor](https://clapor.free.je/?i=1#/)
 
-2. Link Video [YT](https://youtu.be/pqeD9WHXmRM)
+2. Link Video [YT](https://www.youtube.com/watch?v=YXKiKKv4rvM)
 
 ## Akhir Kata
 
