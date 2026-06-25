@@ -13,6 +13,92 @@ class Post extends ResourceController
     private $uploadPath = FCPATH . 'uploads/';
     private $uploadUrl = '/uploads/';
 
+    private $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    private $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    private $maxSize = 2097152; // 2MB
+
+    private function validateImage($file): ?string
+    {
+        if (!$file || !$file->isValid()) {
+            return 'File gambar bukti wajib diunggah.';
+        }
+
+        if ($file->hasMoved()) {
+            return null;
+        }
+
+        if ($file->getSize() > $this->maxSize) {
+            return 'Ukuran file maksimal 2MB.';
+        }
+
+        $ext = strtolower($file->getExtension());
+        if (!in_array($ext, $this->allowedExts)) {
+            return 'Ekstensi file tidak diizinkan. Gunakan JPG, PNG, GIF, atau WEBP.';
+        }
+
+        if (!in_array($file->getMimeType(), $this->allowedMimes)) {
+            return 'Tipe file tidak didukung.';
+        }
+
+        $realMime = $this->getRealMimeType($file->getTempName());
+        if ($realMime !== null && !in_array($realMime, $this->allowedMimes)) {
+            return 'File bukan gambar yang valid.';
+        }
+
+        $content = file_get_contents($file->getTempName(), false, null, 0, 1024);
+        if ($content !== false && preg_match('/<\?php|<\?=/i', $content)) {
+            return 'File mengandung konten berbahaya.';
+        }
+
+        return null;
+    }
+
+    private function getRealMimeType(string $path): ?string
+    {
+        if (function_exists('finfo_open')) {
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($path);
+            return $mime ?: null;
+        }
+
+        if (function_exists('mime_content_type')) {
+            return mime_content_type($path) ?: null;
+        }
+
+        $bytes = @file_get_contents($path, false, null, 0, 12);
+        if ($bytes === false)
+            return null;
+
+        $signatures = [
+            "\xFF\xD8\xFF" => 'image/jpeg',
+            "\x89PNG\r\n\x1a\n" => 'image/png',
+            "GIF87a" => 'image/gif',
+            "GIF89a" => 'image/gif',
+            "RIFF" => 'image/webp',
+        ];
+
+        foreach ($signatures as $sig => $mime) {
+            if (str_starts_with($bytes, $sig)) {
+                if ($mime === 'image/webp' && substr($bytes, 8, 4) !== 'WEBP') {
+                    continue;
+                }
+                return $mime;
+            }
+        }
+
+        return null; // tidak dikenali
+    }
+
+    private function moveImage($file, string $subdir = ''): string
+    {
+        $dest = $this->uploadPath . $subdir;
+        if (!is_dir($dest)) {
+            mkdir($dest, 0755, true);
+        }
+        $nama = $file->getRandomName();
+        $file->move($dest, $nama);
+        return $nama;
+    }
     public function index()
     {
         $model = new ArtikelModel();
@@ -37,36 +123,36 @@ class Post extends ResourceController
 
     public function create()
     {
-        $model = new ArtikelModel();
-
-        $gambarNama = null;
-        $gambar = $this->request->getFile('gambar_bukti');
-
-        if ($gambar && $gambar->isValid() && !$gambar->hasMoved()) {
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($gambar->getMimeType(), $allowedTypes)) {
-                return $this->fail('Format file tidak didukung.');
-            }
-            if ($gambar->getSize() > 2 * 1024 * 1024) {
-                return $this->fail('Ukuran file maksimal 2MB.');
-            }
-            $gambarNama = $gambar->getRandomName();
-            $gambar->move($this->uploadPath, $gambarNama);
+        if ($this->request->getMethod() === 'options') {
+            return $this->respond('', 204);
         }
 
-        $judul = $this->request->getVar('judul');
-        if (empty($judul))
-            return $this->fail('Judul tidak boleh kosong.');
+        $clientKey = $this->request->getHeaderLine('X-App-Client-Key');
+
+        if ($clientKey !== 'akuinginyanghijauhijauituuuuuu') {
+            return $this->failUnauthorized('Akses API ditolak. Request tidak sah.');
+        }
+        $model = new ArtikelModel();
+
         $rules = [
             'judul' => 'required|min_length[5]|max_length[150]',
             'isi_laporan' => 'required|min_length[10]',
-            'nama_pelapor' => 'required|alpha_space|max_length[180]',
-            'no_hp_pelapor' => 'required|numeric|min_length[9]|max_length[13]',
-            'email_pelapor' => 'required|valid_email',
+            'nama_pelapor' => 'required|alpha_space|max_length[100]',
+            'no_hp_pelapor' => 'permit_empty|numeric|min_length[9]|max_length[13]',
+            'email_pelapor' => 'permit_empty|valid_email',
         ];
-
         if (!$this->validate($rules)) {
             return $this->fail($this->validator->getErrors());
+        }
+
+        $gambarNama = null;
+        $gambar = $this->request->getFile('gambar_bukti');
+        $imgError = $this->validateImage($gambar);
+        if ($imgError !== null) {
+            return $this->fail($imgError);
+        }
+        if ($gambar && $gambar->isValid() && !$gambar->hasMoved()) {
+            $gambarNama = $this->moveImage($gambar);
         }
 
         $model->insert([
@@ -74,14 +160,12 @@ class Post extends ResourceController
             'nama_pelapor' => $this->request->getVar('nama_pelapor'),
             'email_pelapor' => $this->request->getVar('email_pelapor'),
             'no_hp_pelapor' => $this->request->getVar('no_hp_pelapor'),
-            'judul' => $judul,
+            'judul' => $this->request->getVar('judul'),
             'isi_laporan' => $this->request->getVar('isi_laporan'),
             'lokasi' => $this->request->getVar('lokasi'),
             'status' => $this->request->getVar('status') ?? 'Baru',
             'gambar_bukti' => $gambarNama,
         ]);
-
-        
 
         return $this->respondCreated([
             'status' => 201,
@@ -96,17 +180,14 @@ class Post extends ResourceController
         if (!$id || !$model->find($id))
             return $this->failNotFound('Data tidak ditemukan.');
 
-        $gambar = $this->request->getFile('gambar_bukti');
         $gambarNama = null;
-
+        $gambar = $this->request->getFile('gambar_bukti');
+        $imgError = $this->validateImage($gambar);
+        if ($imgError !== null) {
+            return $this->fail($imgError);
+        }
         if ($gambar && $gambar->isValid() && !$gambar->hasMoved()) {
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($gambar->getMimeType(), $allowedTypes))
-                return $this->fail('Format file tidak didukung.');
-            if ($gambar->getSize() > 2 * 1024 * 1024)
-                return $this->fail('Ukuran file maksimal 2MB.');
-            $gambarNama = $gambar->getRandomName();
-            $gambar->move($this->uploadPath, $gambarNama);
+            $gambarNama = $this->moveImage($gambar);
         }
 
         $rawInput = $this->request->getRawInput();
@@ -178,16 +259,12 @@ class Post extends ResourceController
 
         $gambarNama = null;
         $gambar = $this->request->getFile('gambar_tanggapan');
+        $imgError = $this->validateImage($gambar);
+        if ($imgError !== null) {
+            return $this->fail($imgError);
+        }
         if ($gambar && $gambar->isValid() && !$gambar->hasMoved()) {
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($gambar->getMimeType(), $allowedTypes)) {
-                return $this->fail('Format gambar tidak didukung.');
-            }
-            if ($gambar->getSize() > 2 * 1024 * 1024) {
-                return $this->fail('Ukuran gambar maksimal 2MB.');
-            }
-            $gambarNama = $gambar->getRandomName();
-            $gambar->move($this->uploadPath . 'tanggapan/', $gambarNama);
+            $gambarNama = $this->moveImage($gambar, 'tanggapan/');
         }
 
         $model = new TanggapanModel();
@@ -207,26 +284,21 @@ class Post extends ResourceController
 
     public function deleteTang($id = null)
     {
-        if (!$id) {
+        if (!$id)
             return $this->fail('ID tanggapan tidak valid.');
-        }
 
         $model = new TanggapanModel();
         $tanggapan = $model->find($id);
-
-        if (!$tanggapan) {
+        if (!$tanggapan)
             return $this->failNotFound('Tanggapan tidak ditemukan.');
-        }
 
         if (!empty($tanggapan['gambar_tanggapan'])) {
             $filePath = $this->uploadPath . 'tanggapan/' . $tanggapan['gambar_tanggapan'];
-            if (file_exists($filePath)) {
+            if (file_exists($filePath))
                 unlink($filePath);
-            }
         }
 
         $model->delete($id);
-
         return $this->respondDeleted([
             'status' => 200,
             'error' => null,

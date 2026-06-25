@@ -7,6 +7,7 @@ axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("userToken");
     if (token) config.headers["Authorization"] = "Bearer " + token;
+    config.headers["X-App-Client-Key"] = "akuinginyanghijauhijauituuuuuu";
     return config;
   },
   (error) => Promise.reject(error)
