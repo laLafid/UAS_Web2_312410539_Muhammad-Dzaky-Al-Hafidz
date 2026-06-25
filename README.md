@@ -33,15 +33,15 @@ Form Edit![alt text](assets/gambar/formedit.png)
 
 1. **Persiapan**
     - Editornya, misal Visual Studio Code.
-    ![alt text](public/gambar/tutor/vs.png)
+    ![alt text](backend-api/public/gambar/tutor/vs.png)
     
     - XAMPP, kalo belum punya unduh dulu di [sini](https://www.apachefriends.org/).
 
     - Buka XAMPP control panel dulu, aktifin ``apache`` dan ```mysql``` lalu ke ```php.ini```
-    ![alt text](public/gambar/tutor/amp1.png) 
+    ![alt text](backend-api/public/gambar/tutor/amp1.png) 
     
     buat aktifin 
-    ![alt text](public/gambar/tutor/ampini.png)
+    ![alt text](backend-api/public/gambar/tutor/ampini.png)
 
     - Initiall Codeigniter, silahkan unduh Codeigniter 4 terlebih dahulu, bisa melalui [composer](https://getcomposer.org/) atau [manual](https://github.com/CodeIgniter4/framework/releases/tag/v4.7.2). Kedua cara tersebut sudah terdokumentasi dalam [User Guide Codeigniter 4](https://www.codeigniter.com/user_guide/installation/index.html) jadi teman-teman bisa ikuti instruksi disana.
 
